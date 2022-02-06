@@ -37,7 +37,6 @@ class Exporter implements SpanExporterInterface
             $name,
             $parsedDsn['host'], 
             $parsedDsn['port'],
-            $this->config->getLogger()
         );
 
         $this->spanConverter = new SpanConverter();
@@ -59,7 +58,7 @@ class Exporter implements SpanExporterInterface
     }
 
     /** @inheritDoc */
-    public static function fromConnectionString(string $endpointUrl, string $name, $args = null): AgentExporter
+    public static function fromConnectionString(string $endpointUrl, string $name, $args = null): Exporter //TODO - rename this
     {
         return new Exporter(
             $name,

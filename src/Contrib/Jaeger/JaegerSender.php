@@ -8,34 +8,23 @@ use Jaeger\Thrift\Batch;
 use Jaeger\Thrift\Process;
 use Jaeger\Thrift\Span as JTSpan;
 use Jaeger\Thrift\Tag;
-use Jaeger\Tracer;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use OpenTelemetry\SDK\Behavior\LogsMessagesTrait;
 use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Protocol\TProtocol;
 use Thrift\Transport\THttpClient;
 
 class JaegerSender
 {
+    use LogsMessagesTrait;
+
     private string $serviceName;
 
     private TProtocol $protocol;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var Tracer
-     */
-    private $tracer;
-
     public function __construct(
         string $serviceName,
         string $host,
-        string $port,
-        LoggerInterface $logger = null
+        string $port
     ) {
         $this->serviceName = $serviceName;
         
@@ -44,8 +33,6 @@ class JaegerSender
             $port,
         );
         $this->protocol = new TBinaryProtocol($transport);
-
-        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
@@ -57,15 +44,11 @@ class JaegerSender
             if (empty($spans)) {
                 return;
             }
-    
-            if (empty($this->tracer)) {
-                return ;
-            }
 
             /** @var Tag[] $tags */
             $tags = [];
     
-            //TODO - determine what of this is still needed and how to adapt it
+            //TODO - determine what of this is still needed and how to adapt it for spec compliance
             // foreach ($this->tracer->getTags() as $k => $v) {
             //     if (!in_array($k, $this->mapper->getSpecialSpanTags())) {
             //         if (strpos($k, $this->mapper->getProcessTagsPrefix()) !== 0) {
@@ -109,8 +92,8 @@ class JaegerSender
     
             $batch->write($this->protocol);
             $this->protocol->getTransport()->flush();
-        } catch (\Exception $e) {
-            $this->logger->warning($e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logError('Error exporting jaeger thrift spans over http', ['exception' => $exception->__toString()]);
         }
     }
 }
