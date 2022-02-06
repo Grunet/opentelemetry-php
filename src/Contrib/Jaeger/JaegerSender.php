@@ -33,11 +33,18 @@ class JaegerSender
 
     public function __construct(
         string $serviceName,
-        TProtocol $protocol,
+        string $host,
+        string $port,
         LoggerInterface $logger = null
     ) {
         $this->serviceName = $serviceName;
-        $this->protocol = $protocol;
+        
+        $transport = new THttpClient(
+            $host,
+            $port,
+        );
+        $this->protocol = new TBinaryProtocol($transport);
+
         $this->logger = $logger ?? new NullLogger();
     }
 

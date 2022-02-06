@@ -22,8 +22,6 @@ class Exporter implements SpanExporterInterface
     use UsesSpanConverterTrait;
     use SpanExporterTrait;
 
-    private string $serviceName;
-
     private SpanConverter $spanConverter;
 
     private JaegerSender $jaegerSender;
@@ -32,8 +30,6 @@ class Exporter implements SpanExporterInterface
         $name,
         string $endpointUrl
     ) {
-        $this->serviceName = $name;
-
         $parsedDsn = parse_url($endpointUrl);
 
         if (!is_array($parsedDsn)) {
@@ -44,16 +40,10 @@ class Exporter implements SpanExporterInterface
             throw new InvalidArgumentException('Endpoint should have host, port');
         }
         
-        $transport = new THttpClient(
-            $parsedDsn['host'],
-            $parsedDsn['port'],
-            $endpointUrl
-        );
-        $protocol = new TBinaryProtocol($transport);
-        $this->config->getLogger()->debug('Initializing HTTP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
         $this->jaegerSender = new JaegerSender(
-            $this->serviceName,
-            $protocol, 
+            $name,
+            $parsedDsn['host'], 
+            $parsedDsn['port'],
             $this->config->getLogger()
         );
 
@@ -78,7 +68,7 @@ class Exporter implements SpanExporterInterface
     /** @inheritDoc */
     public static function fromConnectionString(string $endpointUrl, string $name, $args = null): AgentExporter
     {
-        return new AgentExporter(
+        return new Exporter(
             $name,
             $endpointUrl
         );
