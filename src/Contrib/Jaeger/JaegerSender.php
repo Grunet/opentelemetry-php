@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Jaeger\Sender;
+namespace OpenTelemetry\Contrib\Jaeger;
 
 use Jaeger\Mapper\SpanToJaegerMapper;
 use Jaeger\Span as JaegerSpan;

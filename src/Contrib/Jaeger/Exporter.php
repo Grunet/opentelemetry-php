@@ -4,39 +4,68 @@ declare(strict_types=1);
 
 namespace OpenTelemetry\Contrib\Jaeger;
 
+use InvalidArgumentException;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\Psr17FactoryDiscovery;
+use OpenTelemetry\Contrib\Jaeger\JaegerSender;
 use JsonException;
-use OpenTelemetry\SDK\Trace\Behavior\HttpSpanExporterTrait;
+use OpenTelemetry\SDK\Trace\Behavior\SpanExporterTrait;
 use OpenTelemetry\SDK\Trace\Behavior\UsesSpanConverterTrait;
 use OpenTelemetry\SDK\Trace\SpanExporterInterface;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\StreamFactoryInterface;
+use Thrift\Exception\TTransportException;
+use Thrift\Protocol\TBinaryProtocol;
+use Thrift\Transport\THttpClient;
 
 class Exporter implements SpanExporterInterface
 {
     use UsesSpanConverterTrait;
-    use HttpSpanExporterTrait;
+    use SpanExporterTrait;
 
-    private const REQUEST_METHOD = 'POST';
-    private const HEADER_CONTENT_TYPE = 'content-type';
-    private const VALUE_CONTENT_TYPE = 'application/json';
+    private string $serviceName;
+
+    private SpanConverter $spanConverter;
+
+    private JaegerSender $jaegerSender;
 
     public function __construct(
         $name,
-        string $endpointUrl,
-        ClientInterface $client,
-        RequestFactoryInterface $requestFactory,
-        StreamFactoryInterface $streamFactory,
-        SpanConverter $spanConverter = null
+        string $endpointUrl
     ) {
-        $this->setEndpointUrl($endpointUrl);
-        $this->setClient($client);
-        $this->setRequestFactory($requestFactory);
-        $this->setStreamFactory($streamFactory);
-        $this->setSpanConverter($spanConverter ?? new SpanConverter($name));
+        $this->serviceName = $name;
+
+        $parsedDsn = parse_url($endpointUrl);
+
+        if (!is_array($parsedDsn)) {
+            throw new InvalidArgumentException('Unable to parse provided DSN');
+        }
+
+        if (!isset($parsedDsn['host']) || !isset($parsedDsn['port'])) {
+            throw new InvalidArgumentException('Endpoint should have host, port');
+        }
+        
+        $transport = new THttpClient(
+            $parsedDsn['host'],
+            $parsedDsn['port'],
+            $endpointUrl
+        );
+
+        try {
+            $transport->open(); //TODO - figure out if this should go somewhere else
+        } catch (TTransportException $e) {
+            $this->config->getLogger()->warning($e->getMessage());
+        }
+        $protocol = new TBinaryProtocol($transport);
+        $this->config->getLogger()->debug('Initializing HTTP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
+        $this->jaegerSender = new JaegerSender($protocol, $this->config->getLogger());
+
+        $this->spanConverter = new SpanConverter();
+    }
+
+    public function closeHttpConnection(): void
+    {
+        $this->jaegerSender->flush();
+        $this->jaegerSender->close();
     }
 
     /**
