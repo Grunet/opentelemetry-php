@@ -69,39 +69,25 @@ class Exporter implements SpanExporterInterface
     }
 
     /**
-     * @throws JsonException
+     * @psalm-return SpanExporterInterface::STATUS_*
      */
-    protected function serializeTrace(iterable $spans): string
+    public function doExport(iterable $spans): int
     {
-        return json_encode(
-            $this->getSpanConverter()->convert($spans),
-            JSON_THROW_ON_ERROR
-        );
-    }
+        // UDP Transport begins here after converting to thrift format span
+        foreach ($spans as $span) {
+            $cSpan = $this->spanConverter->convert($span);
+            $this->jaegerSender->append($cSpan, $this->serviceName); //TODO - pass the right parameters here
+        }
 
-    /**
-     * @throws JsonException
-     */
-    protected function marshallRequest(iterable $spans): RequestInterface
-    {
-        return $this->createRequest(self::REQUEST_METHOD)
-            ->withBody(
-                $this->createStream(
-                    $this->serializeTrace($spans)
-                )
-            )
-            ->withHeader(self::HEADER_CONTENT_TYPE, self::VALUE_CONTENT_TYPE);
+        return SpanExporterInterface::STATUS_SUCCESS;
     }
 
     /** @inheritDoc */
-    public static function fromConnectionString(string $endpointUrl, string $name, $args = null)
+    public static function fromConnectionString(string $endpointUrl, string $name, $args = null): AgentExporter
     {
-        return new Exporter(
+        return new AgentExporter(
             $name,
-            $endpointUrl,
-            HttpClientDiscovery::find(),
-            Psr17FactoryDiscovery::findRequestFactory(),
-            Psr17FactoryDiscovery::findStreamFactory()
+            $endpointUrl
         );
     }
 }
