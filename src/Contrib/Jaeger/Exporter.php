@@ -49,12 +49,6 @@ class Exporter implements SpanExporterInterface
             $parsedDsn['port'],
             $endpointUrl
         );
-
-        try {
-            $transport->open(); //TODO - figure out if this should go somewhere else
-        } catch (TTransportException $e) {
-            $this->config->getLogger()->warning($e->getMessage());
-        }
         $protocol = new TBinaryProtocol($transport);
         $this->config->getLogger()->debug('Initializing HTTP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
         $this->jaegerSender = new JaegerSender(
