@@ -57,15 +57,13 @@ class Exporter implements SpanExporterInterface
         }
         $protocol = new TBinaryProtocol($transport);
         $this->config->getLogger()->debug('Initializing HTTP Jaeger Tracer with Jaeger.Thrift over Binary protocol');
-        $this->jaegerSender = new JaegerSender($protocol, $this->config->getLogger());
+        $this->jaegerSender = new JaegerSender(
+            $this->serviceName,
+            $protocol, 
+            $this->config->getLogger()
+        );
 
         $this->spanConverter = new SpanConverter();
-    }
-
-    public function closeHttpConnection(): void
-    {
-        $this->jaegerSender->flush();
-        $this->jaegerSender->close();
     }
 
     /**
@@ -73,11 +71,12 @@ class Exporter implements SpanExporterInterface
      */
     public function doExport(iterable $spans): int
     {
-        // UDP Transport begins here after converting to thrift format span
+        $thriftSpans = [];
         foreach ($spans as $span) {
-            $cSpan = $this->spanConverter->convert($span);
-            $this->jaegerSender->append($cSpan, $this->serviceName); //TODO - pass the right parameters here
+            $thriftSpans[] = $this->spanConverter->convert($span);
         }
+
+        $this->jaegerSender->send($thriftSpans);
 
         return SpanExporterInterface::STATUS_SUCCESS;
     }
