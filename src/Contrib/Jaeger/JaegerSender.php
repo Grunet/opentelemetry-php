@@ -6,7 +6,6 @@ namespace Jaeger\Sender;
 
 use Jaeger\Mapper\SpanToJaegerMapper;
 use Jaeger\Span as JaegerSpan;
-use Jaeger\Thrift\Agent\AgentClient;
 use Jaeger\Thrift\Agent\AgentIf;
 use Jaeger\Thrift\Batch;
 use Jaeger\Thrift\Process;
@@ -16,6 +15,7 @@ use Jaeger\Thrift\TagType;
 use Jaeger\Tracer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Thrift\Protocol\TProtocol;
 use const Jaeger\JAEGER_HOSTNAME_TAG_KEY;
 
 class JaegerSender implements SenderInterface
@@ -25,10 +25,7 @@ class JaegerSender implements SenderInterface
      */
     private $spans = [];
 
-    /**
-     * @var AgentIf
-     */
-    private $agentClient;
+    private TProtocol $protocol;
 
     /**
      * @var LoggerInterface
@@ -45,18 +42,12 @@ class JaegerSender implements SenderInterface
      */
     private $mapper;
 
-
-    /**
-     * @param AgentIf $agentClient
-     * @param LoggerInterface|null $logger
-     * @param SpanToJaegerMapper|null $mapper
-     */
     public function __construct(
-        AgentIf $agentClient,
+        TProtocol $protocol,
         LoggerInterface $logger = null,
         SpanToJaegerMapper $mapper = null
     ) {
-        $this->agentClient = $agentClient;
+        $this->protocol = $protocol;
         $this->logger = $logger ?? new NullLogger();
         $this->mapper = $mapper ?? new SpanToJaegerMapper();
     }
@@ -155,7 +146,8 @@ class JaegerSender implements SenderInterface
             ])
         ]);
 
-        $this->agentClient->emitBatch($batch);
+        $batch->write($this->protocol);
+        $this->protocol->getTransport()->flush();
     }
 
     /**
