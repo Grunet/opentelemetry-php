@@ -5,17 +5,10 @@ declare(strict_types=1);
 namespace OpenTelemetry\Contrib\Jaeger;
 
 use InvalidArgumentException;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\Psr17FactoryDiscovery;
 use OpenTelemetry\Contrib\Jaeger\JaegerSender;
-use JsonException;
 use OpenTelemetry\SDK\Trace\Behavior\SpanExporterTrait;
 use OpenTelemetry\SDK\Trace\Behavior\UsesSpanConverterTrait;
 use OpenTelemetry\SDK\Trace\SpanExporterInterface;
-use Psr\Http\Message\RequestInterface;
-use Thrift\Exception\TTransportException;
-use Thrift\Protocol\TBinaryProtocol;
-use Thrift\Transport\THttpClient;
 
 class Exporter implements SpanExporterInterface
 {

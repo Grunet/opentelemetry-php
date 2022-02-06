@@ -8,12 +8,12 @@ use Jaeger\Thrift\Batch;
 use Jaeger\Thrift\Process;
 use Jaeger\Thrift\Span as JTSpan;
 use Jaeger\Thrift\Tag;
-use Jaeger\Thrift\TagType;
 use Jaeger\Tracer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Protocol\TProtocol;
-use const Jaeger\JAEGER_HOSTNAME_TAG_KEY;
+use Thrift\Transport\THttpClient;
 
 class JaegerSender
 {
