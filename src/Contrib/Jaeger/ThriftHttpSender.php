@@ -11,7 +11,6 @@ use OpenTelemetry\SDK\Behavior\LogsMessagesTrait;
 use Psr\Http\Client\ClientInterface;
 use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Protocol\TProtocol;
-use Thrift\Transport\THttpClient;
 
 class ThriftHttpSender
 {
@@ -31,7 +30,7 @@ class ThriftHttpSender
     ) {
         $this->serviceName = $serviceName;
 
-        $transport = new THttpClient(
+        $transport = new CustomizedTHttpClient(
             $host,
             $port,
             $path,
