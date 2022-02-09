@@ -66,12 +66,13 @@ class CustomizedTHttpClient extends THttpClient {
 
         $httpOptions = $baseHttpOptions + array('method' => 'POST',
             'header' => implode("\r\n", $headers),
-            'max_redirects' => 1,
-            'content' => $this->buf_);
+            'max_redirects' => 1, //Relevant discussion around following redirects - https://github.com/guzzle/guzzle/issues/2584
+            // 'content' => $this->buf_
+        );
         if ($this->timeout_ > 0) {
             $httpOptions['timeout'] = $this->timeout_;
         }
-        $this->buf_ = '';
+        // $this->buf_ = '';
 
         $options["http"] = $httpOptions;
         $contextid = stream_context_create($options);
@@ -105,8 +106,14 @@ class CustomizedTHttpClient extends THttpClient {
             $request = $request->withAddedHeader($key, $value);
         }
 
+        $request = $request->withBody(
+            $this->streamFactory->createStream($this->buf_)
+        );
+
 
 
         $this->psr18Client->sendRequest($request);
+
+        $this->buf_ = '';
     }
 }
