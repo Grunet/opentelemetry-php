@@ -103,7 +103,7 @@ class CustomizedTHttpClient extends THttpClient {
         $request = $this->requestFactory->createRequest('POST', $this->endpointUrl);
 
         $defaultHeaders = [
-            'Host' => $host,
+            'Host' => $this->host_, //Port will be implied - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host
             'Accept' => 'application/x-thrift',
             'User-Agent' => 'PHP/THttpClient',
             'Content-Type' => 'application/x-thrift',
