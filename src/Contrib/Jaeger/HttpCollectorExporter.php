@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use OpenTelemetry\SDK\Trace\Behavior\SpanExporterTrait;
 use OpenTelemetry\SDK\Trace\Behavior\UsesSpanConverterTrait;
 use OpenTelemetry\SDK\Trace\SpanExporterInterface;
+use Psr\Http\Client\ClientInterface;
 
 class HttpCollectorExporter implements SpanExporterInterface
 {
@@ -20,7 +21,8 @@ class HttpCollectorExporter implements SpanExporterInterface
 
     public function __construct(
         $name,
-        string $endpointUrl
+        string $endpointUrl,
+        ClientInterface $client
     ) {
         $parsedDsn = parse_url($endpointUrl);
 
@@ -33,6 +35,7 @@ class HttpCollectorExporter implements SpanExporterInterface
         }
 
         $this->sender = new ThriftHttpSender(
+            $client,
             $name,
             $parsedDsn['host'],
             $parsedDsn['port'],

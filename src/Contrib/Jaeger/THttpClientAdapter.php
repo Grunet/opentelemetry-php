@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace OpenTelemetry\Contrib\Jaeger;
 
+use Psr\Http\Client\ClientInterface;
 use Thrift\Transport\THttpClient;
 use Thrift\Transport\TTransport;
 
 class THttpClientAdapter extends TTransport
 {
-    private $tHttpClientInstance;
+    private ClientInterface $psr18Client;
+
+    private THttpClient $tHttpClientInstance;
 
     public function __construct($host, $port = 80, $uri = '', $scheme = 'http', array $context = array())
     {
@@ -20,6 +23,13 @@ class THttpClientAdapter extends TTransport
             $scheme,
             $context
         );
+    }
+
+    public function setPsr18CompliantHttpClient(ClientInterface $client): self 
+    {
+        $this->psr18Client = $client;
+
+        return $this;
     }
 
     /**
