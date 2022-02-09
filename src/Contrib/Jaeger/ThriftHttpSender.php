@@ -30,12 +30,13 @@ class ThriftHttpSender
     ) {
         $this->serviceName = $serviceName;
 
-        $transport = new CustomizedTHttpClient(
+        $transport = (new CustomizedTHttpClient(
             $host,
             $port,
             $path,
             $scheme
-        );
+        ))->setPsr18HttpClient($client);
+        
         $this->protocol = new TBinaryProtocol($transport);
     }
 
