@@ -64,31 +64,31 @@ class CustomizedTHttpClient extends THttpClient {
 
         // $baseHttpOptions = isset($options["http"]) ? $options["http"] : array(); //Unused by Otel
 
-        $httpOptions = $baseHttpOptions + array('method' => 'POST',
-            'header' => implode("\r\n", $headers),
-            'max_redirects' => 1, //Relevant discussion around following redirects - https://github.com/guzzle/guzzle/issues/2584
-            // 'content' => $this->buf_
-        );
+        // $httpOptions = $baseHttpOptions + array('method' => 'POST',
+        //     'header' => implode("\r\n", $headers),
+        //     'max_redirects' => 1, //Relevant discussion around following redirects - https://github.com/guzzle/guzzle/issues/2584
+        //     // 'content' => $this->buf_
+        // );
         // if ($this->timeout_ > 0) {
         //     $httpOptions['timeout'] = $this->timeout_; //Unused by Otel
         // }
         // $this->buf_ = '';
 
         // $options["http"] = $httpOptions;
-        $contextid = stream_context_create($options);
-        $this->handle_ = @fopen(
-            $this->scheme_ . '://' . $host . $this->uri_,
-            'r',
-            false,
-            $contextid
-        );
+        // $contextid = stream_context_create($options);
+        // $this->handle_ = @fopen(
+        //     $this->scheme_ . '://' . $host . $this->uri_,
+        //     'r',
+        //     false,
+        //     $contextid
+        // );
 
-        // Connect failed?
-        if ($this->handle_ === false) {
-            $this->handle_ = null;
-            $error = 'THttpClient: Could not connect to ' . $host . $this->uri_;
-            throw new TTransportException($error, TTransportException::NOT_OPEN);
-        }
+        // // Connect failed?
+        // if ($this->handle_ === false) {
+        //     $this->handle_ = null;
+        //     $error = 'THttpClient: Could not connect to ' . $host . $this->uri_;
+        //     throw new TTransportException($error, TTransportException::NOT_OPEN);
+        // }
 
         //SOS - in progress rewrite below
         $request = $this->requestFactory->createRequest('POST', $this->scheme_ . '://' . $host . $this->uri_);
