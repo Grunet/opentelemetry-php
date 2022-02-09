@@ -30,7 +30,8 @@ class ThriftHttpSender
         string $host,
         int $port,
         string $path,
-        string $scheme
+        string $scheme,
+        string $endpointURL //TODO - clean this up as it's obv duplicating the params above it
     ) {
         $this->serviceName = $serviceName;
 
@@ -42,7 +43,8 @@ class ThriftHttpSender
         ))
         ->setPsr18HttpClient($client)
         ->setPsr7RequestFactory($requestFactory)
-        ->setPsr7StreamFactory($streamFactory);
+        ->setPsr7StreamFactory($streamFactory)
+        ->setEndpointURL($endpointURL);
 
         $this->protocol = new TBinaryProtocol($transport);
     }

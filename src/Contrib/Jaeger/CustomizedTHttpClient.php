@@ -19,6 +19,8 @@ class CustomizedTHttpClient extends THttpClient {
 
     private StreamFactoryInterface $streamFactory;
 
+    private string $endpointUrl;
+
     public function setPsr18HttpClient(ClientInterface $client): self
     {
         $this->psr18Client = $client;
@@ -40,6 +42,13 @@ class CustomizedTHttpClient extends THttpClient {
         return $this;
     }
 
+    public function setEndpointURL(string $endpointUrl): self 
+    {
+        $this->endpointUrl = $endpointUrl;
+
+        return $this;
+    }
+
     /**
      * Opens and sends the actual request over the HTTP connection
      *
@@ -48,7 +57,7 @@ class CustomizedTHttpClient extends THttpClient {
     public function flush()
     {
         // God, PHP really has some esoteric ways of doing simple things.
-        $host = $this->host_ . ($this->port_ != 80 ? ':' . $this->port_ : '');
+        // $host = $this->host_ . ($this->port_ != 80 ? ':' . $this->port_ : '');
 
         // $headers = array();
         // $defaultHeaders = array('Host' => $host,
@@ -91,7 +100,7 @@ class CustomizedTHttpClient extends THttpClient {
         // }
 
         //SOS - in progress rewrite below
-        $request = $this->requestFactory->createRequest('POST', $this->scheme_ . '://' . $host . $this->uri_);
+        $request = $this->requestFactory->createRequest('POST', $this->endpointUrl);
 
         $defaultHeaders = [
             'Host' => $host,
@@ -109,8 +118,6 @@ class CustomizedTHttpClient extends THttpClient {
         $request = $request->withBody(
             $this->streamFactory->createStream($this->buf_)
         );
-
-
 
         $this->psr18Client->sendRequest($request);
 

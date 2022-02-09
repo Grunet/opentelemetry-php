@@ -26,7 +26,7 @@ class HttpCollectorExporter implements SpanExporterInterface
         string $endpointUrl,
         ClientInterface $client,
         RequestFactoryInterface $requestFactory,
-        StreamFactoryInterface $streamFactory,
+        StreamFactoryInterface $streamFactory
     ) {
         $parsedDsn = parse_url($endpointUrl);
 
@@ -46,7 +46,8 @@ class HttpCollectorExporter implements SpanExporterInterface
             $parsedDsn['host'],
             $parsedDsn['port'],
             isset($parsedDsn['path']) ? $parsedDsn['path'] : '', //Matching THttpClient's default
-            isset($parsedDsn['scheme']) ? $parsedDsn['scheme'] : 'http' //Matching THttpClient's default
+            isset($parsedDsn['scheme']) ? $parsedDsn['scheme'] : 'http', //Matching THttpClient's default
+            $endpointUrl
         );
 
         $this->spanConverter = new SpanConverter();
