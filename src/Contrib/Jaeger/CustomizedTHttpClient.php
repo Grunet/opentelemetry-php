@@ -50,15 +50,15 @@ class CustomizedTHttpClient extends THttpClient {
         // God, PHP really has some esoteric ways of doing simple things.
         $host = $this->host_ . ($this->port_ != 80 ? ':' . $this->port_ : '');
 
-        $headers = array();
-        $defaultHeaders = array('Host' => $host,
-            'Accept' => 'application/x-thrift',
-            'User-Agent' => 'PHP/THttpClient',
-            'Content-Type' => 'application/x-thrift',
-            'Content-Length' => TStringFuncFactory::create()->strlen($this->buf_));
-        foreach (array_merge($defaultHeaders, $this->headers_) as $key => $value) {
-            $headers[] = "$key: $value";
-        }
+        // $headers = array();
+        // $defaultHeaders = array('Host' => $host,
+        //     'Accept' => 'application/x-thrift',
+        //     'User-Agent' => 'PHP/THttpClient',
+        //     'Content-Type' => 'application/x-thrift',
+        //     'Content-Length' => TStringFuncFactory::create()->strlen($this->buf_));
+        // foreach (array_merge($defaultHeaders, $this->headers_) as $key => $value) {
+        //     $headers[] = "$key: $value";
+        // }
 
         $options = $this->context_;
 
@@ -88,5 +88,25 @@ class CustomizedTHttpClient extends THttpClient {
             $error = 'THttpClient: Could not connect to ' . $host . $this->uri_;
             throw new TTransportException($error, TTransportException::NOT_OPEN);
         }
+
+        //SOS - in progress rewrite below
+        $request = $this->requestFactory->createRequest('POST', $this->scheme_ . '://' . $host . $this->uri_);
+
+        $defaultHeaders = [
+            'Host' => $host,
+            'Accept' => 'application/x-thrift',
+            'User-Agent' => 'PHP/THttpClient',
+            'Content-Type' => 'application/x-thrift',
+            'Content-Length' => TStringFuncFactory::create()->strlen($this->buf_)
+        ];
+        $allHeaders = array_merge($defaultHeaders, $this->headers_);
+
+        foreach ($allHeaders as $key => $value) {
+            $request = $request->withAddedHeader($key, $value);
+        }
+
+
+
+        $this->psr18Client->sendRequest($request);
     }
 }
