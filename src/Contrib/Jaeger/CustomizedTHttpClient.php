@@ -60,21 +60,21 @@ class CustomizedTHttpClient extends THttpClient {
         //     $headers[] = "$key: $value";
         // }
 
-        $options = $this->context_;
+        // $options = $this->context_;
 
-        $baseHttpOptions = isset($options["http"]) ? $options["http"] : array();
+        // $baseHttpOptions = isset($options["http"]) ? $options["http"] : array(); //Unused by Otel
 
         $httpOptions = $baseHttpOptions + array('method' => 'POST',
             'header' => implode("\r\n", $headers),
             'max_redirects' => 1, //Relevant discussion around following redirects - https://github.com/guzzle/guzzle/issues/2584
             // 'content' => $this->buf_
         );
-        if ($this->timeout_ > 0) {
-            $httpOptions['timeout'] = $this->timeout_;
-        }
+        // if ($this->timeout_ > 0) {
+        //     $httpOptions['timeout'] = $this->timeout_; //Unused by Otel
+        // }
         // $this->buf_ = '';
 
-        $options["http"] = $httpOptions;
+        // $options["http"] = $httpOptions;
         $contextid = stream_context_create($options);
         $this->handle_ = @fopen(
             $this->scheme_ . '://' . $host . $this->uri_,
