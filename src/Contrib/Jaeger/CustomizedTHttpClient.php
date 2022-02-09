@@ -102,16 +102,14 @@ class CustomizedTHttpClient extends THttpClient {
         //SOS - in progress rewrite below
         $request = $this->requestFactory->createRequest('POST', $this->endpointUrl);
 
-        $defaultHeaders = [
+        $headers = [
             'Host' => $this->host_, //Port will be implied - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Host
             'Accept' => 'application/x-thrift',
             'User-Agent' => 'PHP/THttpClient',
             'Content-Type' => 'application/x-thrift',
             'Content-Length' => TStringFuncFactory::create()->strlen($this->buf_)
         ];
-        $allHeaders = array_merge($defaultHeaders, $this->headers_);
-
-        foreach ($allHeaders as $key => $value) {
+        foreach ($headers as $key => $value) {
             $request = $request->withAddedHeader($key, $value);
         }
 
