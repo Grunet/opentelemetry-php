@@ -8,6 +8,7 @@ use Jaeger\Thrift\Batch;
 use Jaeger\Thrift\Process;
 use Jaeger\Thrift\Span as JTSpan;
 use OpenTelemetry\SDK\Behavior\LogsMessagesTrait;
+use Psr\Http\Client\ClientInterface;
 use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Protocol\TProtocol;
 use Thrift\Transport\THttpClient;
@@ -21,6 +22,7 @@ class ThriftHttpSender
     private TProtocol $protocol;
 
     public function __construct(
+        ClientInterface $client,
         string $serviceName,
         string $host,
         int $port,
