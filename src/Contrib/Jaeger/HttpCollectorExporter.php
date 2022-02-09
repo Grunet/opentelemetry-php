@@ -9,6 +9,8 @@ use OpenTelemetry\SDK\Trace\Behavior\SpanExporterTrait;
 use OpenTelemetry\SDK\Trace\Behavior\UsesSpanConverterTrait;
 use OpenTelemetry\SDK\Trace\SpanExporterInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 class HttpCollectorExporter implements SpanExporterInterface
 {
@@ -22,7 +24,9 @@ class HttpCollectorExporter implements SpanExporterInterface
     public function __construct(
         $name,
         string $endpointUrl,
-        ClientInterface $client
+        ClientInterface $client,
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory,
     ) {
         $parsedDsn = parse_url($endpointUrl);
 
@@ -36,6 +40,8 @@ class HttpCollectorExporter implements SpanExporterInterface
 
         $this->sender = new ThriftHttpSender(
             $client,
+            $requestFactory,
+            $streamFactory,
             $name,
             $parsedDsn['host'],
             $parsedDsn['port'],

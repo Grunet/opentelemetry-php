@@ -11,6 +11,8 @@ use OpenTelemetry\SDK\Behavior\LogsMessagesTrait;
 use Psr\Http\Client\ClientInterface;
 use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Protocol\TProtocol;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 class ThriftHttpSender
 {
@@ -22,6 +24,8 @@ class ThriftHttpSender
 
     public function __construct(
         ClientInterface $client,
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory,
         string $serviceName,
         string $host,
         int $port,
@@ -35,8 +39,11 @@ class ThriftHttpSender
             $port,
             $path,
             $scheme
-        ))->setPsr18HttpClient($client);
-        
+        ))
+        ->setPsr18HttpClient($client)
+        ->setPsr7RequestFactory($requestFactory)
+        ->setPsr7StreamFactory($streamFactory);
+
         $this->protocol = new TBinaryProtocol($transport);
     }
 

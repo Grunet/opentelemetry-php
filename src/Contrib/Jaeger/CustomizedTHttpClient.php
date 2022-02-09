@@ -8,14 +8,34 @@ use Psr\Http\Client\ClientInterface;
 use Thrift\Transport\THttpClient;
 use Thrift\Exception\TTransportException;
 use Thrift\Factory\TStringFuncFactory;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 class CustomizedTHttpClient extends THttpClient {
 
     private ClientInterface $psr18Client;
 
+    private RequestFactoryInterface $requestFactory;
+
+    private StreamFactoryInterface $streamFactory;
+
     public function setPsr18HttpClient(ClientInterface $client): self
     {
         $this->psr18Client = $client;
+
+        return $this;
+    }
+
+    public function setPsr7RequestFactory(RequestFactoryInterface $requestFactory): self
+    {
+        $this->requestFactory = $requestFactory;
+
+        return $this;
+    }
+
+    public function setPsr7StreamFactory(StreamFactoryInterface $streamFactory): self
+    {
+        $this->streamFactory = $streamFactory;
 
         return $this;
     }
