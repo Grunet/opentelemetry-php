@@ -34,8 +34,16 @@ class HttpCollectorExporter implements SpanExporterInterface
             throw new InvalidArgumentException('Unable to parse provided DSN');
         }
 
-        if (!isset($parsedDsn['host']) || !isset($parsedDsn['port'])) {
-            throw new InvalidArgumentException('Endpoint should have host, port');
+        if (!isset($parsedDsn['host'])) {
+            throw new InvalidArgumentException('Endpoint should have host');
+        }
+
+        if (!isset($parsedDsn['port'])) {
+            if ($parsedDsn['scheme'] === 'https') {
+                $parsedDsn['port'] = 443;
+            } else {
+                $parsedDsn['port'] = 80;
+            }
         }
 
         $this->sender = new ThriftHttpSender(
@@ -58,9 +66,7 @@ class HttpCollectorExporter implements SpanExporterInterface
      */
     public function doExport(iterable $spans): int
     {
-        $thriftSpans = $this->spanConverter->convert($spans);
-
-        $this->sender->send($thriftSpans);
+        $this->sender->send($this->spanConverter->convert($spans));
 
         return SpanExporterInterface::STATUS_SUCCESS;
     }
