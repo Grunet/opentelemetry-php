@@ -237,7 +237,7 @@ class JaegerSpanConverterTest extends TestCase
 
         $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
 
-        $this->assertSame(-9223372036854775808, $signedInt64); //-2^63
+        $this->assertSame(PHP_INT_MIN, $signedInt64); //-2^63 = -9223372036854775808 (weird that when inlining the value into the assertion it splits it into -<something>-1, causing it to fail)
     }
 
     public function test_1() 
