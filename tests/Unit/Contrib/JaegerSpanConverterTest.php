@@ -16,6 +16,7 @@ use OpenTelemetry\SDK\Trace\Link;
 use OpenTelemetry\SDK\Trace\StatusData;
 use OpenTelemetry\Tests\Unit\SDK\Util\SpanData;
 use PHPUnit\Framework\TestCase;
+use Brick\Math\BigInteger;
 
 /**
  * @covers OpenTelemetry\Contrib\Jaeger\SpanConverter
@@ -239,6 +240,15 @@ class JaegerSpanConverterTest extends TestCase
         $this->assertSame(-9223372036854775808, $signedInt64); //-2^63
     }
 
+    public function test_1() 
+    {
+        $spanId = '0000000000000001';
+
+        $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
+
+        $this->assertSame(-9223372036854775807, $signedInt64); //-2^63 + 1
+    }
+
     public function test_2_63_minus_1() 
     {
         $spanId = '7FFFFFFFFFFFFFFF';
@@ -278,17 +288,25 @@ class JaegerSpanConverterTest extends TestCase
     }
 
     private function convert_hex_string_to_uint64($hexString) {
-        $firstChar = (int) $hexString[0];
+        // $firstChar = (int) $hexString[0];
 
-        if ($firstChar <= 7) {
-            // return bcsub((string) intval(substr($hexString, 0, 16), 16), '9223372036854775808'); //2^63
-            return bcsub((string) intval(substr($hexString, 0, 16), 16), '9223372036854775808'); //2^63
-        }
+        // if ($firstChar <= 7) {
+        //     // return bcsub((string) intval(substr($hexString, 0, 16), 16), '9223372036854775808'); //2^63
+        //     return bcsub((string) intval(substr($hexString, 0, 16), 16), '9223372036854775808'); //2^63
+        // }
 
-        //The else case can probably just chop 8 off of the first character (for subtracting 2^63), then use intval to convert
+        // //The else case can probably just chop 8 off of the first character (for subtracting 2^63), then use intval to convert
 
-        $a = intval(substr($hexString, 0, 16), 16);
+        // $a = intval(substr($hexString, 0, 16), 16);
 
-        return $a;
+        // return $a;
+
+        $theNumber = BigInteger::fromBase($hexString, 16);
+        $whatToSubtract = BigInteger::fromBase('8000000000000000', 16);
+
+        $theResult = $theNumber->minus($whatToSubtract);
+        $outputAsNormalInt = $theResult->toInt();
+
+        return $outputAsNormalInt;
     }
 }
