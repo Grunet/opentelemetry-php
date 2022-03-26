@@ -229,4 +229,66 @@ class JaegerSpanConverterTest extends TestCase
         $this->assertSame(0, $convertedSpan->references[0]->traceIdHigh);
         $this->assertSame(0, $convertedSpan->references[0]->spanId);
     }
+
+    public function test_0() 
+    {
+        $spanId = '0000000000000000';
+
+        $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
+
+        $this->assertSame(-9223372036854775808, $signedInt64); //-2^63
+    }
+
+    public function test_2_63_minus_1() 
+    {
+        $spanId = '7FFFFFFFFFFFFFFF';
+
+        $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
+
+        $this->assertSame(-1, $signedInt64); 
+    }
+
+    public function test_2_63() 
+    {
+        $spanId = '8000000000000000';
+
+        $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
+
+        $this->assertSame(0, $signedInt64);
+    }
+
+    public function test_2_64() 
+    {
+        $spanId = 'FFFFFFFFFFFFFFFF';
+
+        $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
+
+        //This incidentally passes right now from intval's truncation of everything above 2^63 - 1 down to it
+        $this->assertSame(9223372036854775807, $signedInt64); //2^63 - 1
+    }
+
+    //Adding this to compesnate for the 2^64 false positive
+    public function test_2_64_minus_1() 
+    {
+        $spanId = 'FFFFFFFFFFFFFFFE';
+
+        $signedInt64 = $this->convert_hex_string_to_uint64($spanId);
+
+        $this->assertSame(9223372036854775806, $signedInt64); //2^63 - 2
+    }
+
+    private function convert_hex_string_to_uint64($hexString) {
+        $firstChar = (int) $hexString[0];
+
+        if ($firstChar <= 7) {
+            // return bcsub((string) intval(substr($hexString, 0, 16), 16), '9223372036854775808'); //2^63
+            return bcsub((string) intval(substr($hexString, 0, 16), 16), '9223372036854775808'); //2^63
+        }
+
+        //The else case can probably just chop 8 off of the first character (for subtracting 2^63), then use intval to convert
+
+        $a = intval(substr($hexString, 0, 16), 16);
+
+        return $a;
+    }
 }

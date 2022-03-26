@@ -8,7 +8,7 @@ update:
 	$(DC_RUN_PHP) env XDEBUG_MODE=off composer update
 test: test-unit test-integration
 test-unit:
-	$(DC_RUN_PHP) env XDEBUG_MODE=coverage vendor/bin/phpunit --testsuite unit --colors=always --coverage-text --testdox --coverage-clover coverage.clover --coverage-html=tests/coverage/html --log-junit=junit.xml
+	$(DC_RUN_PHP) vendor/bin/phpunit --testsuite unit --colors=always --coverage-text --testdox --coverage-clover coverage.clover --coverage-html=tests/coverage/html --log-junit=junit.xml
 test-integration:
 	$(DC_RUN_PHP) env XDEBUG_MODE=off vendor/bin/phpunit --testsuite integration --colors=always
 test-coverage:
