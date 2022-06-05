@@ -34,12 +34,7 @@ phpmetrics:
 trace examples: FORCE
 	docker-compose up -d --remove-orphans
 	$(DC_RUN_PHP) php ./examples/AlwaysOnZipkinExample.php
-	$(DC_RUN_PHP) php ./examples/AlwaysOffTraceExample.php
-	$(DC_RUN_PHP) php ./examples/AlwaysOnJaegerExample.php
-        # The following examples do not use the DC_RUN_PHP global because they need environment variables.
-	docker-compose run -e NEW_RELIC_ENDPOINT -e NEW_RELIC_INSERT_KEY --rm php php ./examples/AlwaysOnNewrelicExample.php
-	docker-compose run -e NEW_RELIC_ENDPOINT -e NEW_RELIC_INSERT_KEY --rm php php ./examples/AlwaysOnZipkinToNewrelicExample.php
-	docker-compose stop
+	docker compose down
 collector:
 	docker-compose -f docker-compose.collector.yaml up -d --remove-orphans
 	docker-compose -f docker-compose.collector.yaml run -e OTEL_EXPORTER_OTLP_ENDPOINT=collector:4317 --rm php php ./examples/AlwaysOnOTLPGrpcExample.php
