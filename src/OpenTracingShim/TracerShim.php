@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
+use OpenTelemetry\API\Trace\TracerProviderInterface;
+
 class TracerShim implements \OpenTracing\Tracer
 {
+    private TracerProviderInterface $tracerProvider;
     private \OpenTracing\ScopeManager $scopeManagerShim;
 
-    public function __construct()
+    public function __construct(TracerProviderInterface $tracerProvider)
     {
+        $this->tracerProvider = $tracerProvider;
         $this->scopeManagerShim = new ScopeManagerShim();
     }
 
@@ -146,7 +150,8 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function flush(): void
     {
-        //TODO - use the TracerProvider instance passed in and call its forceFlush method
-        throw new BadMethodCallException('Not implemented');
+        if ($this->tracerProvider instanceof \OpenTelemetry\SDK\Trace\TracerProviderInterface) {
+            $this->tracerProvider->forceFlush();
+        }
     }
 }
