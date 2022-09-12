@@ -3,15 +3,26 @@
 declare(strict_types=1);
 
 use OpenTelemetry\API\Trace\TracerProviderInterface;
+use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
+use OpenTelemetry\Context\Propagation\TextMapPropagator;
+use OpenTelemetry\Context\Propagation\TextMapPropagatorInterface;
 
 class TracerShim implements \OpenTracing\Tracer
 {
     private TracerProviderInterface $tracerProvider;
+    private ?TextMapPropagatorInterface $textMapPropagator;
+    private ?TextMapPropagatorInterface $httpHeadersPropagator;
     private \OpenTracing\ScopeManager $scopeManagerShim;
 
-    public function __construct(TracerProviderInterface $tracerProvider)
-    {
+    public function __construct(
+        TracerProviderInterface $tracerProvider,
+        TextMapPropagatorInterface $textMapPropagator = null,
+        TextMapPropagatorInterface $httpHeadersPropagator = null
+    ) {
         $this->tracerProvider = $tracerProvider;
+        $this->textMapPropagator = $textMapPropagator;
+        $this->httpHeadersPropagator = $httpHeadersPropagator;
+
         $this->scopeManagerShim = new ScopeManagerShim();
     }
 
@@ -126,7 +137,6 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function inject(\OpenTracing\SpanContext $spanContext, string $format, &$carrier): void
     {
-        //TODO - needs the propagation helpers setup
         throw new BadMethodCallException('Not implemented');
     }
 
@@ -141,7 +151,6 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function extract(string $format, $carrier): ?\OpenTracing\SpanContext
     {
-        //TODO - needs the propagation helpers setup
         throw new BadMethodCallException('Not implemented');
     }
 
@@ -160,6 +169,20 @@ class TracerShim implements \OpenTracing\Tracer
     {
         if ($this->tracerProvider instanceof \OpenTelemetry\SDK\Trace\TracerProviderInterface) {
             $this->tracerProvider->forceFlush();
+        }
+    }
+
+    private function getPropagator(string $openTracingFormat): ?TextMapPropagator
+    {
+        switch ($openTracingFormat) {
+            case \OpenTracing\Formats\TEXT_MAP;
+                return $this->textMapPropagator ?? TraceContextPropagator::getInstance();
+            case \OpenTracing\Formats\HTTP_HEADERS;
+                return $this->httpHeadersPropagator ?? TraceContextPropagator::getInstance();
+            case \OpenTracing\Formats\BINARY;
+                return null;
+            default:
+                return null;
         }
     }
 }

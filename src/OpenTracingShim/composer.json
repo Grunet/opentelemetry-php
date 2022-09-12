@@ -21,6 +21,7 @@
     "require": {
         "php": "^7.4 || ^8.0",
         "open-telemetry/api": "self.version",
+        "open-telemetry/context": "self.version",
         "open-telemetry/sdk": "self.version",
         "opentracing/opentracing": "^1.0"
     },
