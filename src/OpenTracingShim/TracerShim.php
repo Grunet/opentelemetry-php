@@ -106,6 +106,7 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function inject(\OpenTracing\SpanContext $spanContext, string $format, &$carrier): void
     {
+        //TODO - needs the propagation helpers setup
         throw new BadMethodCallException("Not implemented");
     }
 
@@ -120,6 +121,7 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function extract(string $format, $carrier): ?\OpenTracing\SpanContext
     {
+        //TODO - needs the propagation helpers setup
         throw new BadMethodCallException("Not implemented");
     }
 
@@ -136,6 +138,7 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function flush(): void
     {
+        //TODO - use the TracerProvider instance passed in and call its forceFlush method
         throw new BadMethodCallException("Not implemented");
     }
 }
