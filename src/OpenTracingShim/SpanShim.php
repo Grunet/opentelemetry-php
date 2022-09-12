@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
-class SpanShim
+use OpenTracing\Span;
+
+class SpanShim implements Span
 {
 }

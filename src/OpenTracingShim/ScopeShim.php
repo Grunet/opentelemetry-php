@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
-class ScopeShim
+use OpenTracing\Scope;
+
+class ScopeShim implements Scope
 {
 }

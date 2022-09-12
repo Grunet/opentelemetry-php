@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
-class SpanContextShim
+use OpenTracing\SpanContext;
+
+class SpanContextShim implements SpanContext
 {
 }

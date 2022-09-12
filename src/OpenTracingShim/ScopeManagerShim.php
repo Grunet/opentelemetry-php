@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
-class ScopeManagerShim
+use OpenTracing\ScopeManager;
+
+class ScopeManagerShim implements ScopeManager
 {
 }

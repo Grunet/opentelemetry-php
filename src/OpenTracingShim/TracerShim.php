@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
-class TracerShim
+use OpenTracing\Tracer;
+
+class TracerShim implements Tracer
 {
 }
