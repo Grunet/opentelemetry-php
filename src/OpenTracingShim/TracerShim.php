@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use OpenTelemetry\API\Trace\AbstractSpan;
 use OpenTelemetry\API\Trace\NonRecordingSpan;
 use OpenTelemetry\API\Trace\TracerProviderInterface;
 use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
@@ -153,7 +154,7 @@ class TracerShim implements \OpenTracing\Tracer
         if ($propagator !== null) {
             //TODO - handle the baggage parts of this, as is done here - https://github.com/open-telemetry/opentelemetry-js/blob/f59c5b268bd60778d7a0d185a6044688f9e3dd51/packages/opentelemetry-shim-opentracing/src/shim.ts#L174
             $context = Context::getRoot()->withContextValue(new NonRecordingSpan($spanContext->getSpanContext()));
-            //TODO - determine if it's ok to pass null for the PropagationSetterInterface parameter here
+            //TODO - determine if it's ok to pass null for the PropagationSetterInterface parameter here, or if there's a global default to pass instead
             $propagator->inject($carrier, null, $context);
         }
     }
@@ -169,7 +170,29 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function extract(string $format, $carrier): ?\OpenTracing\SpanContext
     {
-        throw new BadMethodCallException('Not implemented');
+        if ($format === \OpenTracing\Formats\BINARY) {
+            //TODO - look for an issue to link tracking the lack of support for this (as none of the other langs seem to either)
+            throw \OpenTracing\UnsupportedFormatException::forFormat(\OpenTracing\Formats\BINARY);
+        }
+
+        //TODO - determine if $carrier needs any extra validation
+
+        $propagator = $this->getOtelPropagator($format);
+        if ($propagator !== null) {
+            //TODO - determine if it's ok to pass null for the PropagationSetterInterface parameter here, or if there's a global default to pass instead
+            $context = $propagator->extract($carrier, null, Context::getRoot());
+
+            $otelSpanContext = AbstractSpan::fromContext($context)->getContext();
+            //TODO - handle the baggage part of this, see JS here - https://github.com/open-telemetry/opentelemetry-js/blob/f59c5b268bd60778d7a0d185a6044688f9e3dd51/packages/opentelemetry-shim-opentracing/src/shim.ts#L197
+
+            if ($otelSpanContext === null) {
+                return null;
+            }
+
+            return new SpanContextShim($otelSpanContext);
+        }
+
+        return null;
     }
 
     /**
