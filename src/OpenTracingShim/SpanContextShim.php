@@ -2,8 +2,17 @@
 
 declare(strict_types=1);
 
+use OpenTelemetry\API\Trace\SpanContext;
+
 class SpanContextShim implements \OpenTracing\SpanContext
 {
+    private SpanContext $otelSpanContext;
+
+    public function __construct(SpanContext $otelSpanContext)
+    {
+        $this->otelSpanContext = $otelSpanContext;
+    }
+
     /**
      * Returns the value of a baggage item based on its key. If there is no
      * value with such key it will return null.
@@ -31,5 +40,10 @@ class SpanContextShim implements \OpenTracing\SpanContext
     public function getIterator(): Traversable
     {
         throw new BadMethodCallException("Not implemented");
+    }
+
+    public function getSpanContext(): SpanContext
+    {
+        return $this->otelSpanContext;
     }
 }

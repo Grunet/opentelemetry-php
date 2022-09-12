@@ -137,7 +137,24 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function inject(\OpenTracing\SpanContext $spanContext, string $format, &$carrier): void
     {
-        throw new BadMethodCallException('Not implemented');
+        if ($format === \OpenTracing\Formats\BINARY) {
+            //TODO - look for an issue to link tracking the lack of support for this (as none of the other langs seem to either)
+            throw \OpenTracing\UnsupportedFormatException::forFormat(\OpenTracing\Formats\BINARY);
+        }
+
+        if (!($spanContext instanceof SpanContextShim)) {
+            return;
+        }
+
+        //TODO - determine if $carrier needs any extra validation
+
+        $propagator = $this->getOtelPropagator($format);
+        if ($propagator !== null) {
+            //TODO - handle the baggage parts of this, as is done here - https://github.com/open-telemetry/opentelemetry-js/blob/f59c5b268bd60778d7a0d185a6044688f9e3dd51/packages/opentelemetry-shim-opentracing/src/shim.ts#L174
+            $context = Context::getRoot()->withContextValue(new NonRecordingSpan($spanContext->getSpanContext()));
+            //TODO - determine if it's ok to pass null for the PropagationSetterInterface parameter here
+            $propagator->inject($carrier, null, $context)
+        }
     }
 
     /**
@@ -172,7 +189,7 @@ class TracerShim implements \OpenTracing\Tracer
         }
     }
 
-    private function getPropagator(string $openTracingFormat): ?TextMapPropagator
+    private function getOtelPropagator(string $openTracingFormat): ?TextMapPropagator
     {
         switch ($openTracingFormat) {
             case \OpenTracing\Formats\TEXT_MAP;
