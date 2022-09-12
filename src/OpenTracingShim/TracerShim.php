@@ -62,7 +62,15 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function startActiveSpan(string $operationName, $options = []): \OpenTracing\Scope
     {
-        throw new BadMethodCallException("Not implemented");
+        //Copied from this jaeger implementation - https://github.com/jukylin/jaeger-php/blob/master/src/Jaeger/Jaeger.php#L89
+        if (!($options instanceof \OpenTracing\StartSpanOptions)) {
+            $options = \OpenTracing\StartSpanOptions::create($options);
+        }
+
+        return $this->scopeManagerShim->activate(
+            $this->startSpan($operationName, $options),
+            $options->shouldFinishSpanOnClose()
+        );
     }
 
     /**
@@ -83,46 +91,46 @@ class TracerShim implements \OpenTracing\Tracer
      * @param array|StartSpanOptions $options See StartSpanOptions for
      *                                        available options.
      *
-     * @return Span
-     *
      * @throws InvalidSpanOptionException for invalid option
      * @throws InvalidReferencesSetException for invalid references set
+     * @return \OpenTracing\Span
+     *
      * @see \OpenTracing\StartSpanOptions
      */
     public function startSpan(string $operationName, $options = []): \OpenTracing\Span
     {
-        throw new BadMethodCallException("Not implemented");
+        throw new BadMethodCallException('Not implemented');
     }
 
     /**
      * @param SpanContext $spanContext
      * @param string $format
      * @param mixed $carrier
-     * @return void
-     *
      * @throws UnsupportedFormatException when the format is not recognized by the tracer
      * implementation
+     * @return void
+     *
      * @see Formats
      */
     public function inject(\OpenTracing\SpanContext $spanContext, string $format, &$carrier): void
     {
         //TODO - needs the propagation helpers setup
-        throw new BadMethodCallException("Not implemented");
+        throw new BadMethodCallException('Not implemented');
     }
 
     /**
      * @param string $format
      * @param mixed $carrier
-     * @return SpanContext|null
-     *
      * @throws UnsupportedFormatException when the format is not recognized by the tracer
      * implementation
+     * @return SpanContext|null
+     *
      * @see Formats
      */
     public function extract(string $format, $carrier): ?\OpenTracing\SpanContext
     {
         //TODO - needs the propagation helpers setup
-        throw new BadMethodCallException("Not implemented");
+        throw new BadMethodCallException('Not implemented');
     }
 
     /**
@@ -139,6 +147,6 @@ class TracerShim implements \OpenTracing\Tracer
     public function flush(): void
     {
         //TODO - use the TracerProvider instance passed in and call its forceFlush method
-        throw new BadMethodCallException("Not implemented");
+        throw new BadMethodCallException('Not implemented');
     }
 }
