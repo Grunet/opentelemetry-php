@@ -30,7 +30,7 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function getActiveSpan(): ?\OpenTracing\Span
     {
-        throw new BadMethodCallException("Not implemented");
+        return $this->scopeManagerShim->getActive();
     }
 
     /**
