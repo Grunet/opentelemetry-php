@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
+use OpenTelemetry\API\Trace\NonRecordingSpan;
 use OpenTelemetry\API\Trace\TracerProviderInterface;
 use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
-use OpenTelemetry\Context\Propagation\TextMapPropagator;
+use OpenTelemetry\Context\Context;
 use OpenTelemetry\Context\Propagation\TextMapPropagatorInterface;
 
 class TracerShim implements \OpenTracing\Tracer
@@ -153,7 +154,7 @@ class TracerShim implements \OpenTracing\Tracer
             //TODO - handle the baggage parts of this, as is done here - https://github.com/open-telemetry/opentelemetry-js/blob/f59c5b268bd60778d7a0d185a6044688f9e3dd51/packages/opentelemetry-shim-opentracing/src/shim.ts#L174
             $context = Context::getRoot()->withContextValue(new NonRecordingSpan($spanContext->getSpanContext()));
             //TODO - determine if it's ok to pass null for the PropagationSetterInterface parameter here
-            $propagator->inject($carrier, null, $context)
+            $propagator->inject($carrier, null, $context);
         }
     }
 
@@ -189,7 +190,7 @@ class TracerShim implements \OpenTracing\Tracer
         }
     }
 
-    private function getOtelPropagator(string $openTracingFormat): ?TextMapPropagator
+    private function getOtelPropagator(string $openTracingFormat): ?TextMapPropagatorInterface
     {
         switch ($openTracingFormat) {
             case \OpenTracing\Formats\TEXT_MAP;
