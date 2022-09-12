@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 class TracerShim implements \OpenTracing\Tracer
 {
+    private \OpenTracing\ScopeManager $scopeManagerShim;
+
+    public function __construct()
+    {
+        $this->scopeManagerShim = new ScopeManagerShim();
+    }
+
     /**
      * Returns the current {@link ScopeManager}, which may be a noop but may not be null.
      *
@@ -11,7 +18,7 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function getScopeManager(): \OpenTracing\ScopeManager
     {
-        throw new BadMethodCallException("Not implemented");
+        return $this->scopeManagerShim;
     }
 
     /**
