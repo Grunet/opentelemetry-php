@@ -103,7 +103,15 @@ class TracerShim implements \OpenTracing\Tracer
      */
     public function startSpan(string $operationName, $options = []): \OpenTracing\Span
     {
-        throw new BadMethodCallException('Not implemented');
+        //Copied from this jaeger implementation - https://github.com/jukylin/jaeger-php/blob/master/src/Jaeger/Jaeger.php#L89
+        if (!($options instanceof \OpenTracing\StartSpanOptions)) {
+            $options = \OpenTracing\StartSpanOptions::create($options);
+        }
+
+        $tracer = $this->tracerProvider->getTracer("opentracing-shim"); //TODO - see about getting the "current shim library version" and passing it in the 2nd parameter here like the spec suggests - https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/compatibility/opentracing.md#create-an-opentracing-tracer-shim
+        $span = $tracer->spanBuilder($operationName)->startSpan(); //TODO - properly translate the options instead of ignoring them
+
+        return new SpanShim($span); //TODO - actually make this constructor accept this...
     }
 
     /**
