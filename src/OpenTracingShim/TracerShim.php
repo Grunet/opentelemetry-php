@@ -109,9 +109,9 @@ class TracerShim implements \OpenTracing\Tracer
         }
 
         $tracer = $this->tracerProvider->getTracer("opentracing-shim"); //TODO - see about getting the "current shim library version" and passing it in the 2nd parameter here like the spec suggests - https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/compatibility/opentracing.md#create-an-opentracing-tracer-shim
-        $span = $tracer->spanBuilder($operationName)->startSpan(); //TODO - properly translate the options instead of ignoring them
+        $span = $tracer->spanBuilder($operationName)->startSpan(); //TODO - properly translate the options instead of ignoring them, JS's implementation for reference - https://github.com/open-telemetry/opentelemetry-js/blob/f59c5b268bd60778d7a0d185a6044688f9e3dd51/packages/opentelemetry-shim-opentracing/src/shim.ts#L36
 
-        return new SpanShim($span); //TODO - actually make this constructor accept this...
+        return new SpanShim($span); //TODO - actually make this constructor accept this
     }
 
     /**
